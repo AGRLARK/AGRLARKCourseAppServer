@@ -1,4 +1,17 @@
 // MERN STACK SERVER FOLDER NOTES
+
+Push repository to GitHub:
+Step-1: Initialize git init
+git init
+Step-2: Staged the changes
+git add . or git add -A
+Step-3: Commit the changes
+git commit -m "first trial commit"
+Step-4: After creating the GitHub repo in GitHub copy the ssh link and paste here
+git remote add origin git@github.com:AGRLARK/AGRLARKCourseAppServer.git
+Step-5: push the local code from local to GitHub
+git push origin master
+
 //app.js
 import express from "express";
 import dotenv from "dotenv";
