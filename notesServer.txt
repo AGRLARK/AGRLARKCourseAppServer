@@ -12,6 +12,23 @@ git remote add origin git@github.com:AGRLARK/AGRLARKCourseAppServer.git
 Step-5: push the local code from local to GitHub
 git push origin master
 
+Library Used :-
+	"bcrypt": Jab hum user ka password db me store karenge tab hume usee Hash karke store karna h 
+    "cloudinary": course ke posts / videos wo saare cloudinary par upload honge
+    "cookie-parser": req.cookie me se jo hum cookie ko access kar paye
+    "cors": Cross-origin Fetching ke lie mtlab: hamara frontend different ip par and humara server different ip par hoga hume usee ek hi api se start kar sakte h
+    "datauri": (data uniform resource identifier) 
+    "dotenv": .config me jo bhi variable honge usse store karne ke liye
+    "express": Express.js, is a back end web application framework for building RESTful APIs with Node.js,
+    "jsonwebtoken": login ke liye hume jwt token banana h 
+    "mongoose": Mongoose is Object data model(ODM) is used for that simplifies the interaction between MongoDB and Node.js/Express.js applications. (Mongoose MongoDB ke saath Node.js/Express.js applications ke beech ki interaction ko asaan banata hai.)
+    "multer": form submit karte waqt jo bhi req.files bhejenege multer ki help se usko access kar sakte h i.e. Block with the help of datauri will take URI to access files or blogs
+    "node-cron": e.g. mujhe every monday ek function call karwana h then we can use this node-cron
+    "nodemailer": used for mail 
+    "razorpay": payment Integration
+    "validator": email verify karni h isiliye
+
+
 //app.js
 import express from "express";
 import dotenv from "dotenv";
@@ -22,11 +39,18 @@ dotenv.config({
 export const app = express();
 
 -------here in the above we can directly -----
-import config as import {config} from 'config';
+import config as 'config'; import {config} from 'config';
 
 config({
   path: "./config/config.env",
 });
+---------------dotenv can also be used by -----------
+import dotenv from "dotenv";
+
+dotenv.config({
+  path: "./config/config.env",
+});
+
 
 //server.js
 import { app } from "./app.js";
