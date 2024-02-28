@@ -5,7 +5,6 @@ import { SendToken } from "./../utils/SendToken.js";
 
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
-
   // const file = req.file;
 
   if (!name || !email || !password)
@@ -26,4 +25,36 @@ export const register = catchAsyncError(async (req, res, next) => {
     },
   });
   SendToken(res, user, "Registered Successfully", 201);
+});
+
+export const login = catchAsyncError(async (req, res, next) => {
+  const { email, password } = req.body;
+  console.log("email", email, "password", password);
+
+  // const file = req.file;
+
+  if (!email || !password)
+    return next(new ErrorHandler("Please fill all the fields", 400));
+
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) return next(new ErrorHandler("Invalid Email or Password", 401));
+
+  const isMatch = await user.comparePassword(password);
+
+  if (!isMatch) return next(new ErrorHandler("Invalid Email or Password", 401));
+
+  SendToken(res, user, `Welcome Back , ${user.name} `, 200);
+});
+
+export const logout = catchAsyncError(async (req, res, next) => {
+  res
+    .status(200)
+    .cookie("token", null, {
+      expires: new Date(Date.now()),
+    })
+    .json({
+      sucess: true,
+      message: "Logout Successfully",
+    });
 });
