@@ -2,6 +2,8 @@ import { catchAsyncError } from "./../middleware/catchAsyncError.js";
 import ErrorHandler from "./../utils/ErrorHandler.js";
 import User from "./../model/User.js";
 import { SendToken } from "./../utils/SendToken.js";
+import { sendEmail } from "./../utils/SendEmail.js";
+import crypto from "crypto";
 
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -110,5 +112,55 @@ export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Profile Picture Updated Successfully",
+  });
+});
+
+//Forget Password
+export const forgetPassword = catchAsyncError(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!email) return next(new ErrorHandler("User not found", 400));
+
+  const resetToken = await user.getResetPassword();
+  await user.save();
+
+  const url = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
+  const message = `Click on the link to reset your Password ${url}.If you have not requested then please ignore or Contact Customer Support  `;
+
+  //Send Token via Email
+  await sendEmail(user.email, "AGRLARK COURSEAPP RESET PASSWORD", message);
+
+  res.status(200).json({
+    success: true,
+    message: `Reset Password has been send to ${user.email}`,
+  });
+});
+//Reset Password
+export const resetPassword = catchAsyncError(async (req, res, next) => {
+  const { token } = req.params;
+
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: {
+      $gt: Date.now(),
+    },
+  });
+  if (!user)
+    return next(new ErrorHandler("Token is Invalid or has been Expired"));
+
+  user.password = req.body.password;
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
+
+  res.status(200).json({
+    success: true,
+    message: "Password changed Successfully",
   });
 });
