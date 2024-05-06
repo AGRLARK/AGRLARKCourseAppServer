@@ -4,6 +4,7 @@ import User from "./../model/User.js";
 import { SendToken } from "./../utils/SendToken.js";
 import { sendEmail } from "./../utils/SendEmail.js";
 import crypto from "crypto";
+import Course from "./../model/Course.js";
 
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -137,6 +138,7 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
     message: `Reset Password has been send to ${user.email}`,
   });
 });
+
 //Reset Password
 export const resetPassword = catchAsyncError(async (req, res, next) => {
   const { token } = req.params;
@@ -152,6 +154,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
       $gt: Date.now(),
     },
   });
+
   if (!user)
     return next(new ErrorHandler("Token is Invalid or has been Expired"));
 
@@ -162,5 +165,52 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Password changed Successfully",
+  });
+});
+
+// Add to Playlist
+export const addToPlaylist = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+
+  const course = await Course.findById(req.body.id);
+  if (!course) return next(new ErrorHandler("Invalid Course Id", 404));
+
+  const itemExit = user.playlist.find((item) => {
+    if (item.course.toString() === course._id.toString()) return true;
+  });
+
+  if (itemExit) return next(new ErrorHandler("Item Already Exist", 409));
+
+  user.playlist.push({
+    course: course._id,
+    poster: course.poster.url,
+  });
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Added to Playlist",
+  });
+});
+
+//Remove from Playlist
+export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user._id);
+
+  const course = await Course.findById(req.query.id);
+  if (!course) return next(new ErrorHandler("Invalid Course Id", 404));
+
+  const newPlaylist = user.playlist.filter((item) => {
+    if (item.course.toString() !== course._id.toString()) return item;
+  });
+
+  user.playlist = newPlaylist;
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Removed from  Playlist",
   });
 });
