@@ -4,6 +4,7 @@ import { isAuthenticated, authorizeAdmin } from "./../middleware/auth.js";
 import {
   addLectures,
   createCourse,
+  deleteCourse,
   deleteLecture,
   getAllCourses,
   getCourseLectures,
@@ -24,8 +25,11 @@ router
   .route("/course/:id")
   .get(isAuthenticated, getCourseLectures)
   .post(isAuthenticated, authorizeAdmin, singleUpload, addLectures)
-  .delete(isAuthenticated, authorizeAdmin, deleteLecture);
+  .delete(isAuthenticated, authorizeAdmin, deleteCourse);
 
-//Delete lecture
+// Delete Lectures
+router
+  .route("/deleteLecture")
+  .delete(isAuthenticated, authorizeAdmin, deleteLecture);
 
 export default router;
