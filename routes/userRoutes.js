@@ -1,5 +1,6 @@
 import express from "express";
 import { isAuthenticated } from "./../middleware/auth.js";
+import singleUpload from "./../middleware/multer.js";
 import {
   login,
   register,
@@ -16,7 +17,7 @@ import {
 
 const router = express.Router();
 
-router.route("/register").post(register);
+router.route("/register").post(singleUpload, register);
 
 // Login
 router.route("/login").post(login);
@@ -36,7 +37,7 @@ router.route("/updateprofile").put(isAuthenticated, updateProfile);
 // Update Profile Picture
 router
   .route("/updateprofilepicture")
-  .put(isAuthenticated, updateProfilePicture);
+  .put(isAuthenticated, singleUpload, updateProfilePicture);
 
 // Forget Password
 router.route("/forgetpassword").post(forgetPassword);

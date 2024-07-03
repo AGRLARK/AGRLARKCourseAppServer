@@ -5,17 +5,22 @@ import { SendToken } from "./../utils/SendToken.js";
 import { sendEmail } from "./../utils/SendEmail.js";
 import crypto from "crypto";
 import Course from "./../model/Course.js";
+import getDatauri from "../utils/dataUri.js";
+import cloudinary from "cloudinary";
 
 export const register = catchAsyncError(async (req, res, next) => {
   const { name, email, password } = req.body;
-  // const file = req.file;
+  const file = req.file;
 
-  if (!name || !email || !password)
+  if (!name || !email || !password || !file)
     return next(new ErrorHandler("Please fill all the fields", 400));
 
   let user = await User.findOne({ email });
 
   if (user) return next(new ErrorHandler("User Already Exist ", 409));
+
+  const fileUri = getDatauri(file);
+  const mycloud = await cloudinary.v2.uploader.upload(fileUri.content);
 
   //Upload file on cloudinary
   user = await User.create({
@@ -23,8 +28,8 @@ export const register = catchAsyncError(async (req, res, next) => {
     email,
     password,
     avatar: {
-      public_id: "tempid",
-      url: "tempurl",
+      public_id: mycloud.public_id,
+      url: mycloud.secure_url,
     },
   });
   SendToken(res, user, "Registered Successfully", 201);
@@ -108,7 +113,21 @@ export const updateProfile = catchAsyncError(async (req, res, next) => {
 });
 
 export const updateProfilePicture = catchAsyncError(async (req, res, next) => {
-  //Cloudinary:TODO
+  const file = req.file;
+
+  const user = await User.findById(req.user._id);
+
+  const fileUri = getDatauri(file);
+  const mycloud = await cloudinary.v2.uploader.upload(fileUri.content);
+
+  await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+  user.avatar = {
+    public_id: mycloud.public_id,
+    url: mycloud.secure_url,
+  };
+
+  await user.save();
 
   res.status(200).json({
     success: true,
