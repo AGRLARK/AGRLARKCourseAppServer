@@ -60,18 +60,22 @@ export const logout = catchAsyncError(async (req, res, next) => {
     .status(200)
     .cookie("token", null, {
       expires: new Date(Date.now()),
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
     })
     .json({
-      sucess: true,
+      success: true,
       message: "Logout Successfully",
     });
 });
 
 export const getMyProfile = catchAsyncError(async (req, res, next) => {
+  console.log("getMyProfile called, req.user:", req.user);
   const user = await User.findById(req.user._id);
 
   res.status(200).json({
-    sucess: true,
+    success: true,
     user,
   });
 });
